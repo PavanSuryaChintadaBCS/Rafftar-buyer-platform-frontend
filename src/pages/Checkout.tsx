@@ -24,6 +24,16 @@ const Checkout = () => {
   const { placeOrder } = useOrders();
   const navigate = useNavigate();
 
+  // Auth guards
+  if (!buyer.isLoggedIn) {
+    navigate("/login", { state: { from: "/checkout" } });
+    return null;
+  }
+  if (!buyer.isKYCVerified) {
+    navigate("/kyc");
+    return null;
+  }
+
   const [addressId, setAddressId] = useState(mockAddresses[0].id);
   const [deliveryDate, setDeliveryDate] = useState<Date>(addDays(new Date(), 5));
   const [approvalRequired, setApprovalRequired] = useState(false);

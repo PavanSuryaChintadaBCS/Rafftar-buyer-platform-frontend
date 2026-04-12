@@ -3,17 +3,17 @@ import { Buyer, BuyerType } from "@/data/types";
 
 interface BuyerContextType {
   buyer: Buyer;
-  login: () => void;
+  login: (name?: string) => void;
   logout: () => void;
   toggleKYC: () => void;
   setBuyerType: (type: BuyerType) => void;
 }
 
 const defaultBuyer: Buyer = {
-  isLoggedIn: true,
-  isKYCVerified: true,
+  isLoggedIn: false,
+  isKYCVerified: false,
   type: "standard",
-  name: "Rajesh Kumar",
+  name: "",
 };
 
 const BuyerContext = createContext<BuyerContextType | undefined>(undefined);
@@ -29,8 +29,20 @@ export const BuyerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem("buildmart_buyer", JSON.stringify(b));
   };
 
-  const login = useCallback(() => persist({ ...buyer, isLoggedIn: true }), [buyer]);
-  const logout = useCallback(() => persist({ ...buyer, isLoggedIn: false }), [buyer]);
+  const login = useCallback((name?: string) => {
+    const loginName = name || "User";
+    const isRajesh = loginName.toLowerCase().includes("rajesh");
+    persist({
+      ...buyer,
+      isLoggedIn: true,
+      name: loginName,
+      type: isRajesh ? "rafftar" : "standard",
+      // Rajesh is pre-verified, others need KYC
+      isKYCVerified: isRajesh ? true : buyer.isKYCVerified,
+    });
+  }, [buyer]);
+
+  const logout = useCallback(() => persist({ ...defaultBuyer }), []);
   const toggleKYC = useCallback(() => persist({ ...buyer, isKYCVerified: !buyer.isKYCVerified }), [buyer]);
   const setBuyerType = useCallback((type: BuyerType) => persist({ ...buyer, type }), [buyer]);
 
