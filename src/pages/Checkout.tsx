@@ -31,6 +31,14 @@ const Checkout = () => {
 
   const selectedAddress = mockAddresses.find((a) => a.id === addressId)!;
 
+  useEffect(() => {
+    if (!buyer.isLoggedIn) {
+      navigate("/login", { state: { from: "/checkout" } });
+    } else if (!buyer.isKYCVerified) {
+      navigate("/kyc");
+    }
+  }, [buyer.isLoggedIn, buyer.isKYCVerified, navigate]);
+
   const totals = useMemo(() => {
     const subtotal = items.reduce((s, i) => {
       const product = getProductById(i.productId);
