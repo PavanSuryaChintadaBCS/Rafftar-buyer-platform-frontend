@@ -102,7 +102,7 @@ const ProductDetail = () => {
                   </p>
                 )}
                 {pricing.savings > 0 && (
-                  <p className="text-xs text-green-600">You save ₹{Math.round(pricing.savings)} on bulk pricing!</p>
+                  <p className="text-xs text-primary">You save ₹{Math.round(pricing.savings)} on bulk pricing!</p>
                 )}
                 <p className="text-sm font-semibold">Total: ₹{Math.round(pricing.rafftarPrice ? pricing.rafftarPrice * quantity : pricing.totalPrice)}</p>
               </div>
