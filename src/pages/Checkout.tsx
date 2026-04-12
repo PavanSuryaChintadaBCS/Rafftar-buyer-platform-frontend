@@ -24,6 +24,11 @@ const Checkout = () => {
   const { placeOrder } = useOrders();
   const navigate = useNavigate();
 
+  const [addressId, setAddressId] = useState(mockAddresses[0].id);
+  const [deliveryDate, setDeliveryDate] = useState<Date>(addDays(new Date(), 5));
+  const [approvalRequired, setApprovalRequired] = useState(false);
+  const [step, setStep] = useState<"address" | "summary">("address");
+
   const selectedAddress = mockAddresses.find((a) => a.id === addressId)!;
 
   const totals = useMemo(() => {
