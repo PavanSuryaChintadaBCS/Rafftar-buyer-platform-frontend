@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getProductImage } from "@/data/images";
-import { Star, MapPin, ShoppingCart, MessageSquare, AlertTriangle, Lock, Zap, Eye, Calendar, CreditCard } from "lucide-react";
+import { Star, MapPin, ShoppingCart, AlertTriangle, Lock, Zap, Eye, Calendar, CreditCard } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useBuyer } from "@/contexts/BuyerContext";
 import { toast } from "sonner";
@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const KYC_PROMPT_DELAY = 2 * 60 * 1000; // 2 minutes
+const KYC_PROMPT_DELAY = 2 * 60 * 1000;
 
 const experienceCities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Kolkata", "Ahmedabad"];
 
@@ -46,7 +46,6 @@ const ProductDetail = () => {
   const [sampleRequested, setSampleRequested] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 2-minute KYC prompt for logged-in but non-KYC users
   useEffect(() => {
     if (buyer.isLoggedIn && !buyer.isKYCVerified) {
       timerRef.current = setTimeout(() => {
@@ -140,7 +139,6 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* KYC Prompt Dialog */}
       <Dialog open={showKYCPrompt} onOpenChange={setShowKYCPrompt}>
         <DialogContent>
           <DialogHeader>
@@ -160,7 +158,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Book Visit Dialog */}
       <Dialog open={showVisitDialog} onOpenChange={setShowVisitDialog}>
         <DialogContent>
           <DialogHeader>
@@ -200,12 +197,10 @@ const ProductDetail = () => {
 
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Image */}
           <div className="aspect-square bg-secondary/10 rounded-xl flex items-center justify-center overflow-hidden">
             <img src={getProductImage(product.category)} alt={product.name} className="h-full w-full object-cover" />
           </div>
 
-          {/* Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-xs text-muted-foreground uppercase tracking-wide">{product.category}</p>
@@ -223,7 +218,6 @@ const ProductDetail = () => {
               <span className="text-sm text-muted-foreground">({product.reviewCount} reviews)</span>
             </div>
 
-            {/* Pricing */}
             {showPrice ? (
               <div className="bg-accent/50 rounded-lg p-4 space-y-2">
                 <div className="flex items-baseline gap-2">
@@ -263,7 +257,6 @@ const ProductDetail = () => {
 
             <p className="text-muted-foreground text-sm leading-relaxed">{product.description}</p>
 
-            {/* Quantity + MOQ */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Quantity ({product.unit})</label>
               <div className="flex items-center gap-3">
@@ -282,7 +275,6 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               <Button className="gap-2" onClick={handleBuyNow} disabled={!product.inStock}>
                 <CreditCard className="h-4 w-4" /> Buy Now
@@ -302,15 +294,10 @@ const ProductDetail = () => {
                 <Calendar className="h-4 w-4" /> Book Visit
               </Button>
             </div>
-
-            <Button variant="outline" className="gap-2 w-full">
-              <MessageSquare className="h-4 w-4" /> Contact Supplier
-            </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-          {/* Specifications */}
           <div>
             <h2 className="text-lg font-bold mb-3">Specifications</h2>
             <Table>
@@ -325,7 +312,6 @@ const ProductDetail = () => {
             </Table>
           </div>
 
-          {/* Bulk Pricing */}
           <div>
             <h2 className="text-lg font-bold mb-3">Bulk Pricing</h2>
             {showPrice ? (
@@ -360,7 +346,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Supplier Card */}
         {supplier && (
           <Card className="mt-10">
             <CardContent className="p-6 flex flex-col sm:flex-row gap-4 items-start">
