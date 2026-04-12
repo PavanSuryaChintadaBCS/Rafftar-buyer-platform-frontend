@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, CheckCircle2 } from "lucide-react";
@@ -26,7 +25,6 @@ const Checkout = () => {
 
   const [addressId, setAddressId] = useState(mockAddresses[0].id);
   const [deliveryDate, setDeliveryDate] = useState<Date>(addDays(new Date(), 5));
-  const [approvalRequired, setApprovalRequired] = useState(false);
   const [step, setStep] = useState<"address" | "summary">("address");
 
   const selectedAddress = mockAddresses.find((a) => a.id === addressId)!;
@@ -58,7 +56,7 @@ const Checkout = () => {
 
   const handlePlaceOrder = () => {
     if (items.length === 0) return;
-    const order = placeOrder(items, selectedAddress, deliveryDate.toISOString(), approvalRequired);
+    const order = placeOrder(items, selectedAddress, deliveryDate.toISOString(), false);
     clearCart();
     toast.success(`Order ${order.id} placed successfully!`);
     navigate(`/order/${order.id}`);
@@ -129,16 +127,6 @@ const Checkout = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Require Approval</p>
-                  <p className="text-xs text-muted-foreground">Simulate manager approval before order is confirmed</p>
-                </div>
-                <Switch checked={approvalRequired} onCheckedChange={setApprovalRequired} />
-              </CardContent>
-            </Card>
-
             <Button className="w-full" size="lg" onClick={() => setStep("summary")}>
               Continue to Summary
             </Button>
@@ -183,7 +171,6 @@ const Checkout = () => {
                 <p className="font-medium mb-1">Delivering to: {selectedAddress.label}</p>
                 <p className="text-muted-foreground">{selectedAddress.line1}, {selectedAddress.city} – {selectedAddress.pin}</p>
                 <p className="mt-2 font-medium">Expected: {format(deliveryDate, "PPP")}</p>
-                {approvalRequired && <p className="text-primary text-xs mt-1">⚠ This order requires manager approval</p>}
               </CardContent>
             </Card>
 

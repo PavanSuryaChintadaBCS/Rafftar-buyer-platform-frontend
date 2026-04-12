@@ -35,9 +35,9 @@ const Orders = () => {
           <Package className="h-6 w-6" /> My Orders
         </h1>
 
-        <div className="flex gap-2 mb-6 overflow-x-auto">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
           {["all", "active", "delivered", "delayed"].map((f) => (
-            <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)} className="capitalize">
+            <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)} className="capitalize flex-shrink-0">
               {f}
             </Button>
           ))}
@@ -56,20 +56,21 @@ const Orders = () => {
             {filtered.map((order) => (
               <Link to={`/order/${order.id}`} key={order.id}>
                 <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-sm">{order.id}</span>
-                        <Badge className={statusColors[order.status] || ""} variant="secondary">
-                          {order.status}
-                        </Badge>
-                        {order.approvalRequired && <Badge variant="outline" className="text-xs">Approval Required</Badge>}
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-bold text-sm">{order.id}</span>
+                          <Badge className={statusColors[order.status] || ""} variant="secondary">
+                            {order.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {order.items.length} item{order.items.length > 1 ? "s" : ""} · ₹{order.total.toLocaleString()} · {format(new Date(order.createdAt), "dd MMM yyyy")}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {order.items.length} items · ₹{order.total.toLocaleString()} · {format(new Date(order.createdAt), "dd MMM yyyy")}
-                      </p>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
                   </CardContent>
                 </Card>
               </Link>

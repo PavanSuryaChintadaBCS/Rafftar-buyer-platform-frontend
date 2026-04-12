@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import { useOrders } from "@/contexts/OrderContext";
 import { getProductById } from "@/data/mock";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, Clock, Truck, Package, AlertTriangle, MessageSquare, Zap } from "lucide-react";
+import { CheckCircle2, Clock, Truck, Package, AlertTriangle, MessageSquare, Zap, Paperclip, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -39,6 +39,8 @@ const OrderDetail = () => {
   const [ticketType, setTicketType] = useState<string>("delay");
   const [ticketMessage, setTicketMessage] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Simulate auto-progression
   useEffect(() => {
@@ -46,7 +48,7 @@ const OrderDetail = () => {
     const timer = setTimeout(() => {
       progressOrder(order.id);
       toast.info(`Order ${order.id} status updated!`);
-    }, 15000); // progress every 15s
+    }, 15000);
     return () => clearTimeout(timer);
   }, [order?.status, order?.id]);
 
@@ -61,11 +63,26 @@ const OrderDetail = () => {
     );
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (attachments.length + files.length > 5) {
+      toast.error("Maximum 5 attachments allowed");
+      return;
+    }
+    setAttachments((prev) => [...prev, ...files]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleRaiseTicket = () => {
     if (!ticketMessage.trim()) return;
     const ticket = createTicket(order.id, ticketType as any, ticketMessage);
-    toast.success(`Ticket ${ticket.id} raised!`);
+    toast.success(`Ticket ${ticket.id} raised${attachments.length > 0 ? ` with ${attachments.length} attachment(s)` : ""}!`);
     setTicketMessage("");
+    setAttachments([]);
     setDialogOpen(false);
   };
 
@@ -175,7 +192,7 @@ const OrderDetail = () => {
                 <p className="text-sm text-muted-foreground mb-4">No tickets raised for this order.</p>
               )}
 
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setAttachments([]); }}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1">
                     <MessageSquare className="h-3 w-3" /> Raise a Ticket
@@ -203,6 +220,42 @@ const OrderDetail = () => {
                     <div>
                       <label className="text-sm font-medium mb-1 block">Describe the issue</label>
                       <Textarea value={ticketMessage} onChange={(e) => setTicketMessage(e.target.value)} placeholder="Explain your issue..." rows={3} />
+                    </div>
+                    {/* Attachments */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Attachments (optional)</label>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/*,.pdf,.doc,.docx"
+                        className="hidden"
+                        onChange={handleFileSelect}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Paperclip className="h-3 w-3" /> Add Files
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-1">Images, PDF, DOC – max 5 files</p>
+                      {attachments.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {attachments.map((file, i) => (
+                            <div key={i} className="flex items-center gap-2 text-xs bg-secondary/50 rounded px-2 py-1">
+                              <Paperclip className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                              <span className="truncate flex-1">{file.name}</span>
+                              <span className="text-muted-foreground flex-shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
+                              <button onClick={() => removeAttachment(i)} className="text-muted-foreground hover:text-foreground">
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <Button onClick={handleRaiseTicket} className="w-full">Submit Ticket</Button>
                   </div>
