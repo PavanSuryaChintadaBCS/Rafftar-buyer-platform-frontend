@@ -54,6 +54,8 @@ const Checkout = () => {
     return { subtotal, logistics, tax, total: subtotal + logistics + tax };
   }, [items, buyer.type]);
 
+  if (!buyer.isLoggedIn || !buyer.isKYCVerified) return null;
+
   const handlePlaceOrder = () => {
     if (items.length === 0) return;
     const order = placeOrder(items, selectedAddress, deliveryDate.toISOString(), approvalRequired);
