@@ -13,20 +13,17 @@ const Cart = () => {
   const { items, removeItem, updateQuantity, clearCart, getGroupedBySuppier } = useCart();
   const { buyer } = useBuyer();
   const navigate = useNavigate();
-
-  // Redirect to login if not logged in
-  if (!buyer.isLoggedIn) {
-    navigate("/login", { state: { from: "/cart" } });
-    return null;
-  }
-
-  // Redirect to KYC if not verified
-  if (!buyer.isKYCVerified) {
-    navigate("/kyc");
-    return null;
-  }
-
   const grouped = getGroupedBySuppier();
+
+  useEffect(() => {
+    if (!buyer.isLoggedIn) {
+      navigate("/login", { state: { from: "/cart" } });
+    } else if (!buyer.isKYCVerified) {
+      navigate("/kyc");
+    }
+  }, [buyer.isLoggedIn, buyer.isKYCVerified, navigate]);
+
+  if (!buyer.isLoggedIn || !buyer.isKYCVerified) return null;
 
   const subtotal = items.reduce((s, i) => {
     const product = getProductById(i.productId);
