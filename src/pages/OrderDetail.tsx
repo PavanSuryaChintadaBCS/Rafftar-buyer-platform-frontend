@@ -148,67 +148,69 @@ const OrderDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Raise Ticket */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" /> Support Tickets
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {tickets.length > 0 ? (
-              <div className="space-y-2 mb-4">
-                {tickets.map((t) => (
-                  <Link to={`/ticket/${t.id}`} key={t.id}>
-                    <div className="flex items-center justify-between p-2 rounded-lg border hover:bg-secondary/50 transition-colors">
-                      <div>
-                        <p className="text-sm font-medium">{t.id} – <span className="capitalize">{t.type}</span></p>
-                        <p className="text-xs text-muted-foreground">{t.messages.length} messages</p>
+        {/* Support Tickets - only after delivery */}
+        {order.status === "delivered" && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" /> Support Tickets
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {tickets.length > 0 ? (
+                <div className="space-y-2 mb-4">
+                  {tickets.map((t) => (
+                    <Link to={`/ticket/${t.id}`} key={t.id}>
+                      <div className="flex items-center justify-between p-2 rounded-lg border hover:bg-secondary/50 transition-colors">
+                        <div>
+                          <p className="text-sm font-medium">{t.id} – <span className="capitalize">{t.type}</span></p>
+                          <p className="text-xs text-muted-foreground">{t.messages.length} messages</p>
+                        </div>
+                        <Badge variant={t.status === "open" ? "default" : "secondary"}>{t.status}</Badge>
                       </div>
-                      <Badge variant={t.status === "open" ? "default" : "secondary"}>{t.status}</Badge>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground mb-4">No tickets raised for this order.</p>
-            )}
-
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <MessageSquare className="h-3 w-3" /> Raise a Ticket
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Raise Support Ticket</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-2">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Issue Type</label>
-                    <Select value={ticketType} onValueChange={setTicketType}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="delay">Delivery Delay</SelectItem>
-                        <SelectItem value="quality">Quality Issue</SelectItem>
-                        <SelectItem value="quantity">Quantity Mismatch</SelectItem>
-                        <SelectItem value="invoice">Invoice Problem</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Describe the issue</label>
-                    <Textarea value={ticketMessage} onChange={(e) => setTicketMessage(e.target.value)} placeholder="Explain your issue..." rows={3} />
-                  </div>
-                  <Button onClick={handleRaiseTicket} className="w-full">Submit Ticket</Button>
+                    </Link>
+                  ))}
                 </div>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
+              ) : (
+                <p className="text-sm text-muted-foreground mb-4">No tickets raised for this order.</p>
+              )}
+
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <MessageSquare className="h-3 w-3" /> Raise a Ticket
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Raise Support Ticket</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-2">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Issue Type</label>
+                      <Select value={ticketType} onValueChange={setTicketType}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="delay">Delivery Delay</SelectItem>
+                          <SelectItem value="quality">Quality Issue</SelectItem>
+                          <SelectItem value="quantity">Quantity Mismatch</SelectItem>
+                          <SelectItem value="invoice">Invoice Problem</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Describe the issue</label>
+                      <Textarea value={ticketMessage} onChange={(e) => setTicketMessage(e.target.value)} placeholder="Explain your issue..." rows={3} />
+                    </div>
+                    <Button onClick={handleRaiseTicket} className="w-full">Submit Ticket</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
