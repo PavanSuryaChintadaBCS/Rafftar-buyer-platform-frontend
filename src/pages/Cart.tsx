@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import { useCart } from "@/contexts/CartContext";
 import { useBuyer } from "@/contexts/BuyerContext";
