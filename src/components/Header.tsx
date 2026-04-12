@@ -54,21 +54,25 @@ const Header = () => {
         </form>
 
         <div className="flex items-center gap-1">
-          <Link to="/orders">
-            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
-              <Package className="h-5 w-5" />
-            </Button>
-          </Link>
-          <Link to="/cart">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {itemCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                  {itemCount}
-                </Badge>
-              )}
-            </Button>
-          </Link>
+          {buyer.isLoggedIn && (
+            <Link to="/orders">
+              <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
+                <Package className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+          {buyer.isLoggedIn && (
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {itemCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -106,7 +110,7 @@ const Header = () => {
                     {buyer.type === "rafftar" ? "Switch to Standard" : "Switch to Rafftar ⚡"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>
+                  <DropdownMenuItem onClick={() => { logout(); navigate("/"); }}>
                     <LogOut className="h-4 w-4 mr-2" /> Logout
                   </DropdownMenuItem>
                 </>
