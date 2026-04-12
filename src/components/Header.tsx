@@ -1,4 +1,4 @@
-import { Search, MapPin, ShoppingCart, User, Package, LogOut, LogIn, ChevronDown } from "lucide-react";
+import { Search, ShoppingCart, User, Package, LogOut, LogIn, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -37,11 +37,6 @@ const Header = () => {
             <span className="text-foreground">Mart</span>
           </h1>
         </Link>
-
-        <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground flex-shrink-0">
-          <MapPin className="h-4 w-4" />
-          <span>Mumbai, MH</span>
-        </div>
 
         <form onSubmit={handleSearch} className="flex-1 max-w-xl relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -95,11 +90,11 @@ const Header = () => {
                 ) : "Guest User"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/orders")}>
-                <Package className="h-4 w-4 mr-2" /> My Orders
-              </DropdownMenuItem>
               {buyer.isLoggedIn && (
                 <>
+                  <DropdownMenuItem onClick={() => navigate("/orders")}>
+                    <Package className="h-4 w-4 mr-2" /> My Orders
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/kyc")}>
                     {buyer.isKYCVerified ? "✓ KYC Verified" : "Complete KYC →"}
                   </DropdownMenuItem>

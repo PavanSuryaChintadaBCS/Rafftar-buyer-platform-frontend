@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { getProductImage } from "@/data/images";
-import { Star, MapPin, ShoppingCart, MessageSquare, AlertTriangle, Lock, Zap } from "lucide-react";
+import { Star, MapPin, ShoppingCart, MessageSquare, AlertTriangle, Lock, Zap, Eye, Calendar, CreditCard } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useBuyer } from "@/contexts/BuyerContext";
 import { toast } from "sonner";
@@ -19,8 +20,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const KYC_PROMPT_DELAY = 2 * 60 * 1000; // 2 minutes
+
+const experienceCities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Kolkata", "Ahmedabad"];
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -31,6 +41,9 @@ const ProductDetail = () => {
   const { buyer } = useBuyer();
   const [quantity, setQuantity] = useState(product?.moq || 1);
   const [showKYCPrompt, setShowKYCPrompt] = useState(false);
+  const [showVisitDialog, setShowVisitDialog] = useState(false);
+  const [visitCity, setVisitCity] = useState("");
+  const [sampleRequested, setSampleRequested] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 2-minute KYC prompt for logged-in but non-KYC users
@@ -68,23 +81,57 @@ const ProductDetail = () => {
     );
   }
 
+  const requireLogin = () => {
+    toast.error("Please login first.");
+    navigate("/login", { state: { from: `/product/${product.id}` } });
+  };
+
+  const requireKYC = () => {
+    toast.error("Complete KYC to continue.");
+    navigate("/kyc");
+  };
+
   const handleAddToCart = () => {
-    if (!buyer.isLoggedIn) {
-      toast.error("Please login to add items to cart.");
-      navigate("/login", { state: { from: `/product/${product.id}` } });
-      return;
-    }
-    if (!buyer.isKYCVerified) {
-      toast.error("Complete KYC to add items to cart.");
-      navigate("/kyc");
-      return;
-    }
+    if (!buyer.isLoggedIn) return requireLogin();
+    if (!buyer.isKYCVerified) return requireKYC();
     if (quantity < product.moq) {
       toast.error(`Minimum order quantity is ${product.moq} ${product.unit}`);
       return;
     }
     addItem(product.id, product.supplierId, quantity);
     toast.success(`${product.name} added to cart!`);
+  };
+
+  const handleBuyNow = () => {
+    if (!buyer.isLoggedIn) return requireLogin();
+    if (!buyer.isKYCVerified) return requireKYC();
+    if (quantity < product.moq) {
+      toast.error(`Minimum order quantity is ${product.moq} ${product.unit}`);
+      return;
+    }
+    addItem(product.id, product.supplierId, quantity);
+    navigate("/checkout");
+  };
+
+  const handleBookSample = () => {
+    if (!buyer.isLoggedIn) return requireLogin();
+    setSampleRequested(true);
+    toast.success("Sample request submitted! Our team will contact you shortly.");
+  };
+
+  const handleBookVisit = () => {
+    if (!buyer.isLoggedIn) return requireLogin();
+    setShowVisitDialog(true);
+  };
+
+  const handleSubmitVisit = () => {
+    if (!visitCity) {
+      toast.error("Please select a city");
+      return;
+    }
+    toast.success(`Experience center visit booked in ${visitCity}! We'll send confirmation to your email.`);
+    setShowVisitDialog(false);
+    setVisitCity("");
   };
 
   const showPrice = buyer.isLoggedIn && buyer.isKYCVerified;
@@ -108,6 +155,44 @@ const ProductDetail = () => {
             </Button>
             <Button onClick={() => navigate("/kyc")} className="flex-1">
               Complete KYC
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Book Visit Dialog */}
+      <Dialog open={showVisitDialog} onOpenChange={setShowVisitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Book Your Visit to Experience Center</DialogTitle>
+            <DialogDescription>
+              See and feel the products before you buy. Visit our experience center in a city near you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input value={buyer.name} disabled className="bg-secondary/30" />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={buyer.isLoggedIn ? `${buyer.name.toLowerCase().replace(/\s+/g, ".")}@company.com` : ""} disabled className="bg-secondary/30" />
+            </div>
+            <div className="space-y-2">
+              <Label>Select City for Experience Center</Label>
+              <Select value={visitCity} onValueChange={setVisitCity}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {experienceCities.map((city) => (
+                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleSubmitVisit} className="w-full">
+              Confirm Booking
             </Button>
           </div>
         </DialogContent>
@@ -197,14 +282,30 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 pt-2">
-              <Button className="gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button className="gap-2" onClick={handleBuyNow} disabled={!product.inStock}>
+                <CreditCard className="h-4 w-4" /> Buy Now
+              </Button>
+              <Button variant="outline" className="gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
                 <ShoppingCart className="h-4 w-4" /> Add to Cart
               </Button>
-              <Button variant="outline" className="gap-2">
-                <MessageSquare className="h-4 w-4" /> Contact Supplier
+              <Button
+                variant="secondary"
+                className="gap-2"
+                onClick={handleBookSample}
+                disabled={sampleRequested}
+              >
+                <Eye className="h-4 w-4" /> {sampleRequested ? "Sample Requested ✓" : "Book Sample"}
+              </Button>
+              <Button variant="secondary" className="gap-2" onClick={handleBookVisit}>
+                <Calendar className="h-4 w-4" /> Book Visit
               </Button>
             </div>
+
+            <Button variant="outline" className="gap-2 w-full">
+              <MessageSquare className="h-4 w-4" /> Contact Supplier
+            </Button>
           </div>
         </div>
 
