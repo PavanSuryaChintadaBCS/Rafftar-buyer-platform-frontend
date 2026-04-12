@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -15,15 +15,19 @@ const HeroSearch = () => {
     }
   };
 
-  const quickSearches = ["Cement", "TMT Steel", "Tiles", "Bricks", "Electricals"];
+  const quickSearches = ["Cement", "TMT Steel", "Tiles", "Paints", "Plywood", "Electricals", "Hardware"];
 
   return (
-    <section className="py-12 md:py-20 text-center">
-      <h2 className="text-3xl md:text-5xl font-bold mb-3 tracking-tight">
+    <section className="py-12 md:py-20 text-center animate-fade-in">
+      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-6 animate-scale-in">
+        <TrendingUp className="h-3 w-3" />
+        Trusted by 5,000+ builders across India
+      </div>
+      <h1 className="text-3xl md:text-5xl font-bold mb-3 tracking-tight">
         Find Construction Materials
         <br />
         <span className="text-primary">& Trusted Suppliers</span>
-      </h2>
+      </h1>
       <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
         Search across thousands of products and connect directly with verified suppliers.
       </p>
@@ -34,20 +38,21 @@ const HeroSearch = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search products, suppliers, categories..."
-            className="pl-12 h-12 text-base bg-card shadow-sm border-border/60"
+            className="pl-12 h-12 text-base bg-card shadow-sm border-border/60 focus:shadow-md transition-shadow"
           />
         </div>
-        <Button type="submit" size="lg" className="h-12 px-6">
+        <Button type="submit" size="lg" className="h-12 px-6 hover:scale-105 transition-transform">
           Search
         </Button>
       </form>
       <div className="flex flex-wrap justify-center gap-2 mt-4">
-        {quickSearches.map((term) => (
+        {quickSearches.map((term, i) => (
           <Button
             key={term}
             variant="secondary"
             size="sm"
-            className="text-xs"
+            className="text-xs hover:scale-105 transition-transform"
+            style={{ animationDelay: `${i * 60}ms` }}
             onClick={() => navigate(`/search?q=${encodeURIComponent(term)}`)}
           >
             {term}
