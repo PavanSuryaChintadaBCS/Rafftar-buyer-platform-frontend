@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/data/types";
 import { Link } from "react-router-dom";
-
+import { getProductImage } from "@/data/images";
 interface ProductCardProps {
   product: Product;
 }
@@ -11,11 +11,12 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Card className="group overflow-hidden hover:shadow-md transition-all duration-200 border-border/60">
-      <div className="aspect-square bg-secondary/40 flex items-center justify-center overflow-hidden">
+      <div className="aspect-square bg-secondary/20 flex items-center justify-center overflow-hidden">
         <img
-          src={product.image}
+          src={getProductImage(product.category)}
           alt={product.name}
-          className="h-20 w-20 object-contain opacity-40 group-hover:scale-110 transition-transform"
+          loading="lazy"
+          className="h-full w-full object-cover group-hover:scale-110 transition-transform"
         />
       </div>
       <CardContent className="p-4 space-y-2">

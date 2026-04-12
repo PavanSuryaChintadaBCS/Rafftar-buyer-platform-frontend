@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { getProductImage } from "@/data/images";
 import { Star, MapPin, ShoppingCart, MessageSquare, AlertTriangle, Lock, Zap } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useBuyer } from "@/contexts/BuyerContext";
@@ -64,8 +65,8 @@ const ProductDetail = () => {
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Image */}
-          <div className="aspect-square bg-secondary/30 rounded-xl flex items-center justify-center">
-            <img src={product.image} alt={product.name} className="h-32 w-32 opacity-40" />
+          <div className="aspect-square bg-secondary/10 rounded-xl flex items-center justify-center overflow-hidden">
+            <img src={getProductImage(product.category)} alt={product.name} className="h-full w-full object-cover" />
           </div>
 
           {/* Info */}
