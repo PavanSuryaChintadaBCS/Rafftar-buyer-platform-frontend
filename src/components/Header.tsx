@@ -96,6 +96,9 @@ const Header = () => {
               </DropdownMenuItem>
               {buyer.isLoggedIn && (
                 <>
+                  <DropdownMenuItem onClick={() => navigate("/kyc")}>
+                    {buyer.isKYCVerified ? "✓ KYC Verified" : "Complete KYC →"}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={toggleKYC}>
                     {buyer.isKYCVerified ? "Simulate: Remove KYC" : "Simulate: Verify KYC"}
                   </DropdownMenuItem>
@@ -109,7 +112,7 @@ const Header = () => {
                 </>
               )}
               {!buyer.isLoggedIn && (
-                <DropdownMenuItem onClick={login}>
+                <DropdownMenuItem onClick={() => navigate("/login")}>
                   <LogIn className="h-4 w-4 mr-2" /> Login
                 </DropdownMenuItem>
               )}
