@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import { useCart } from "@/contexts/CartContext";
 import { useBuyer } from "@/contexts/BuyerContext";
@@ -14,6 +15,16 @@ const Cart = () => {
   const { buyer } = useBuyer();
   const navigate = useNavigate();
   const grouped = getGroupedBySuppier();
+
+  useEffect(() => {
+    if (!buyer.isLoggedIn) {
+      navigate("/login", { state: { from: "/cart" } });
+    } else if (!buyer.isKYCVerified) {
+      navigate("/kyc");
+    }
+  }, [buyer.isLoggedIn, buyer.isKYCVerified, navigate]);
+
+  if (!buyer.isLoggedIn || !buyer.isKYCVerified) return null;
 
   const subtotal = items.reduce((s, i) => {
     const product = getProductById(i.productId);

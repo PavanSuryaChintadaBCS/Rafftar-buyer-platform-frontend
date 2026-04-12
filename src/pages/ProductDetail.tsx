@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { getProductById, getSupplierById, getPriceForQuantity } from "@/data/mock";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,40 @@ import { Star, MapPin, ShoppingCart, MessageSquare, AlertTriangle, Lock, Zap } f
 import { useCart } from "@/contexts/CartContext";
 import { useBuyer } from "@/contexts/BuyerContext";
 import { toast } from "sonner";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
+const KYC_PROMPT_DELAY = 2 * 60 * 1000; // 2 minutes
 
 const ProductDetail = () => {
   const { productId } = useParams();
+  const navigate = useNavigate();
   const product = getProductById(productId || "");
   const supplier = product ? getSupplierById(product.supplierId) : undefined;
   const { addItem } = useCart();
   const { buyer } = useBuyer();
   const [quantity, setQuantity] = useState(product?.moq || 1);
+  const [showKYCPrompt, setShowKYCPrompt] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 2-minute KYC prompt for logged-in but non-KYC users
+  useEffect(() => {
+    if (buyer.isLoggedIn && !buyer.isKYCVerified) {
+      timerRef.current = setTimeout(() => {
+        setShowKYCPrompt(true);
+      }, KYC_PROMPT_DELAY);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [buyer.isLoggedIn, buyer.isKYCVerified]);
 
   const pricing = useMemo(() => {
     if (!product) return { unitPrice: 0, totalPrice: 0, savings: 0, rafftarPrice: 0 };
@@ -47,6 +71,12 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     if (!buyer.isLoggedIn) {
       toast.error("Please login to add items to cart.");
+      navigate("/login", { state: { from: `/product/${product.id}` } });
+      return;
+    }
+    if (!buyer.isKYCVerified) {
+      toast.error("Complete KYC to add items to cart.");
+      navigate("/kyc");
       return;
     }
     if (quantity < product.moq) {
@@ -62,6 +92,27 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* KYC Prompt Dialog */}
+      <Dialog open={showKYCPrompt} onOpenChange={setShowKYCPrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Unlock Full Pricing & Ordering</DialogTitle>
+            <DialogDescription>
+              You've been browsing for a while! Complete your KYC verification to unlock pricing, bulk discounts, and place orders.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowKYCPrompt(false)} className="flex-1">
+              Maybe Later
+            </Button>
+            <Button onClick={() => navigate("/kyc")} className="flex-1">
+              Complete KYC
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <main className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Image */}
@@ -108,12 +159,21 @@ const ProductDetail = () => {
                 <p className="text-sm font-semibold">Total: ₹{Math.round(pricing.rafftarPrice ? pricing.rafftarPrice * quantity : pricing.totalPrice)}</p>
               </div>
             ) : (
-              <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (!buyer.isLoggedIn) {
+                    navigate("/login", { state: { from: `/product/${product.id}` } });
+                  } else {
+                    navigate("/kyc");
+                  }
+                }}
+                className="w-full bg-secondary/50 rounded-lg p-4 flex items-center gap-2 hover:bg-secondary/70 transition-colors cursor-pointer text-left"
+              >
                 <Lock className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground text-sm">
-                  {!buyer.isLoggedIn ? "Login to see pricing" : "Complete KYC to unlock pricing"}
+                  {!buyer.isLoggedIn ? "Login to see pricing →" : "Complete KYC to unlock pricing →"}
                 </span>
-              </div>
+              </button>
             )}
 
             <p className="text-muted-foreground text-sm leading-relaxed">{product.description}</p>
@@ -185,10 +245,16 @@ const ProductDetail = () => {
                 </TableBody>
               </Table>
             ) : (
-              <div className="text-center py-8 text-muted-foreground text-sm">
+              <button
+                onClick={() => {
+                  if (!buyer.isLoggedIn) navigate("/login", { state: { from: `/product/${product.id}` } });
+                  else navigate("/kyc");
+                }}
+                className="w-full text-center py-8 text-muted-foreground text-sm hover:bg-secondary/30 rounded-lg transition-colors cursor-pointer"
+              >
                 <Lock className="h-5 w-5 mx-auto mb-2" />
-                {!buyer.isLoggedIn ? "Login to view pricing" : "Complete KYC to view pricing"}
-              </div>
+                {!buyer.isLoggedIn ? "Login to view pricing →" : "Complete KYC to view pricing →"}
+              </button>
             )}
           </div>
         </div>

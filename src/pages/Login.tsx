@@ -1,21 +1,24 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useBuyer } from "@/contexts/BuyerContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Building2, Mail, Lock, User, Phone } from "lucide-react";
+import { Building2, Mail, Lock, User, Phone, Zap } from "lucide-react";
 
 const Login = () => {
   const { login } = useBuyer();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = (location.state as { from?: string })?.from || "/";
 
   // Login state
-  const [loginEmail, setLoginEmail] = useState("rajesh@buildmart.com");
-  const [loginPassword, setLoginPassword] = useState("••••••••");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginName, setLoginName] = useState("");
 
   // Signup state
   const [signupName, setSignupName] = useState("");
@@ -28,13 +31,21 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!loginName) {
+      toast.error("Please enter your name");
+      return;
+    }
     setLoading(true);
-    // Simulate API call
     await new Promise((r) => setTimeout(r, 1200));
-    login();
-    toast.success("Welcome back, Rajesh!");
+    const isRajesh = loginName.toLowerCase().includes("rajesh");
+    login(loginName);
+    if (isRajesh) {
+      toast.success("Welcome back, Rajesh! 🚀 Rafftar pricing activated.");
+    } else {
+      toast.success(`Welcome, ${loginName}! Complete KYC to unlock full features.`);
+    }
     setLoading(false);
-    navigate("/");
+    navigate(isRajesh ? redirectTo : "/kyc");
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -45,7 +56,7 @@ const Login = () => {
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1500));
-    login();
+    login(signupName);
     toast.success("Account created! Complete KYC to unlock full features.");
     setLoading(false);
     navigate("/kyc");
@@ -76,6 +87,19 @@ const Login = () => {
               <TabsContent value="login" className="mt-0">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="login-name">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="login-name"
+                        value={loginName}
+                        onChange={(e) => setLoginName(e.target.value)}
+                        className="pl-10"
+                        placeholder="Rajesh Kumar"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -105,9 +129,15 @@ const Login = () => {
                   <Button type="submit" className="w-full" size="lg" disabled={loading}>
                     {loading ? "Logging in..." : "Login"}
                   </Button>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Demo: Any credentials will work
-                  </p>
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-center space-y-1">
+                    <p className="font-medium flex items-center justify-center gap-1">
+                      <Zap className="h-3 w-3 text-primary" /> Demo Tip
+                    </p>
+                    <p className="text-muted-foreground">
+                      Login as <strong>"Rajesh Kumar"</strong> to see Rafftar exclusive pricing.
+                      Any other name gets standard pricing.
+                    </p>
+                  </div>
                 </form>
               </TabsContent>
 
@@ -122,7 +152,7 @@ const Login = () => {
                         value={signupName}
                         onChange={(e) => setSignupName(e.target.value)}
                         className="pl-10"
-                        placeholder="Rajesh Kumar"
+                        placeholder="Your Name"
                       />
                     </div>
                   </div>

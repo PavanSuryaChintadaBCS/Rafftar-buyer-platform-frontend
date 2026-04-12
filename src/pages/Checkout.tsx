@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useCart } from "@/contexts/CartContext";
@@ -31,6 +31,14 @@ const Checkout = () => {
 
   const selectedAddress = mockAddresses.find((a) => a.id === addressId)!;
 
+  useEffect(() => {
+    if (!buyer.isLoggedIn) {
+      navigate("/login", { state: { from: "/checkout" } });
+    } else if (!buyer.isKYCVerified) {
+      navigate("/kyc");
+    }
+  }, [buyer.isLoggedIn, buyer.isKYCVerified, navigate]);
+
   const totals = useMemo(() => {
     const subtotal = items.reduce((s, i) => {
       const product = getProductById(i.productId);
@@ -45,6 +53,8 @@ const Checkout = () => {
     const tax = Math.round(subtotal * 0.18);
     return { subtotal, logistics, tax, total: subtotal + logistics + tax };
   }, [items, buyer.type]);
+
+  if (!buyer.isLoggedIn || !buyer.isKYCVerified) return null;
 
   const handlePlaceOrder = () => {
     if (items.length === 0) return;
