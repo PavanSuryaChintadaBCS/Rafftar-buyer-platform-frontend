@@ -1,14 +1,24 @@
-import { Search, MapPin, ShoppingCart, User } from "lucide-react";
+import { Search, MapPin, ShoppingCart, User, Package, LogOut, LogIn, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useInquiry } from "@/contexts/InquiryContext";
+import { useCart } from "@/contexts/CartContext";
+import { useBuyer } from "@/contexts/BuyerContext";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [query, setQuery] = useState("");
-  const { itemCount } = useInquiry();
+  const { itemCount } = useCart();
+  const { buyer, login, logout, toggleKYC, setBuyerType } = useBuyer();
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -43,8 +53,13 @@ const Header = () => {
           />
         </form>
 
-        <div className="flex items-center gap-2">
-          <Link to="/inquiry">
+        <div className="flex items-center gap-1">
+          <Link to="/orders">
+            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
+              <Package className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (
@@ -54,9 +69,52 @@ const Header = () => {
               )}
             </Button>
           </Link>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs">{buyer.isLoggedIn ? buyer.name.split(" ")[0] : "Login"}</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                {buyer.isLoggedIn ? (
+                  <div>
+                    <p className="font-medium">{buyer.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {buyer.type === "rafftar" ? "⚡ Rafftar Buyer" : "Standard Buyer"}
+                      {buyer.isKYCVerified ? " · KYC ✓" : " · KYC Pending"}
+                    </p>
+                  </div>
+                ) : "Guest User"}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/orders")}>
+                <Package className="h-4 w-4 mr-2" /> My Orders
+              </DropdownMenuItem>
+              {buyer.isLoggedIn && (
+                <>
+                  <DropdownMenuItem onClick={toggleKYC}>
+                    {buyer.isKYCVerified ? "Simulate: Remove KYC" : "Simulate: Verify KYC"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setBuyerType(buyer.type === "rafftar" ? "standard" : "rafftar")}>
+                    {buyer.type === "rafftar" ? "Switch to Standard" : "Switch to Rafftar ⚡"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="h-4 w-4 mr-2" /> Logout
+                  </DropdownMenuItem>
+                </>
+              )}
+              {!buyer.isLoggedIn && (
+                <DropdownMenuItem onClick={login}>
+                  <LogIn className="h-4 w-4 mr-2" /> Login
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

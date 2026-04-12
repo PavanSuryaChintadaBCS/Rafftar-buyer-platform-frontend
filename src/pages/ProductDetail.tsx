@@ -1,18 +1,36 @@
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import { getProductById, getSupplierById } from "@/data/mock";
+import { getProductById, getSupplierById, getPriceForQuantity } from "@/data/mock";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Star, MapPin, ShoppingCart, MessageSquare } from "lucide-react";
-import { useInquiry } from "@/contexts/InquiryContext";
-import { toast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Star, MapPin, ShoppingCart, MessageSquare, AlertTriangle, Lock, Zap } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { useBuyer } from "@/contexts/BuyerContext";
+import { toast } from "sonner";
+import { useState, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const ProductDetail = () => {
   const { productId } = useParams();
   const product = getProductById(productId || "");
   const supplier = product ? getSupplierById(product.supplierId) : undefined;
-  const { addItem } = useInquiry();
+  const { addItem } = useCart();
+  const { buyer } = useBuyer();
+  const [quantity, setQuantity] = useState(product?.moq || 1);
+
+  const pricing = useMemo(() => {
+    if (!product) return { unitPrice: 0, totalPrice: 0, savings: 0, rafftarPrice: 0 };
+    const unitPrice = getPriceForQuantity(product, quantity);
+    const baseTotal = product.price * quantity;
+    const totalPrice = unitPrice * quantity;
+    const savings = baseTotal - totalPrice;
+    const rafftarPrice = buyer.type === "rafftar" && product.rafftarDiscount > 0
+      ? Math.round(unitPrice * (1 - product.rafftarDiscount / 100))
+      : 0;
+    return { unitPrice, totalPrice, savings, rafftarPrice };
+  }, [product, quantity, buyer.type]);
 
   if (!product) {
     return (
@@ -25,10 +43,20 @@ const ProductDetail = () => {
     );
   }
 
-  const handleAddToInquiry = () => {
-    addItem(product);
-    toast({ title: "Added to Inquiry", description: `${product.name} added to your inquiry cart.` });
+  const handleAddToCart = () => {
+    if (!buyer.isLoggedIn) {
+      toast.error("Please login to add items to cart.");
+      return;
+    }
+    if (quantity < product.moq) {
+      toast.error(`Minimum order quantity is ${product.moq} ${product.unit}`);
+      return;
+    }
+    addItem(product.id, product.supplierId, quantity);
+    toast.success(`${product.name} added to cart!`);
   };
+
+  const showPrice = buyer.isLoggedIn && buyer.isKYCVerified;
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,22 +70,75 @@ const ProductDetail = () => {
 
           {/* Info */}
           <div className="space-y-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">{product.category}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{product.category}</p>
+              {product.rafftarDiscount > 0 && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  <Zap className="h-3 w-3" /> Rafftar Eligible
+                </Badge>
+              )}
+              {!product.inStock && <Badge variant="destructive">Out of Stock</Badge>}
+            </div>
             <h1 className="text-2xl md:text-3xl font-bold">{product.name}</h1>
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 fill-primary text-primary" />
               <span className="font-medium">{product.rating}</span>
               <span className="text-sm text-muted-foreground">({product.reviewCount} reviews)</span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold">₹{product.price}</span>
-              <span className="text-muted-foreground">/{product.unit}</span>
-            </div>
+
+            {/* Pricing */}
+            {showPrice ? (
+              <div className="bg-accent/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold">₹{pricing.rafftarPrice || pricing.unitPrice}</span>
+                  <span className="text-muted-foreground">/{product.unit}</span>
+                  {pricing.rafftarPrice > 0 && (
+                    <span className="text-sm line-through text-muted-foreground">₹{pricing.unitPrice}</span>
+                  )}
+                </div>
+                {pricing.rafftarPrice > 0 && (
+                  <p className="text-xs text-primary flex items-center gap-1">
+                    <Zap className="h-3 w-3" /> Rafftar discount: {product.rafftarDiscount}% off
+                  </p>
+                )}
+                {pricing.savings > 0 && (
+                  <p className="text-xs text-primary">You save ₹{Math.round(pricing.savings)} on bulk pricing!</p>
+                )}
+                <p className="text-sm font-semibold">Total: ₹{Math.round(pricing.rafftarPrice ? pricing.rafftarPrice * quantity : pricing.totalPrice)}</p>
+              </div>
+            ) : (
+              <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-2">
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground text-sm">
+                  {!buyer.isLoggedIn ? "Login to see pricing" : "Complete KYC to unlock pricing"}
+                </span>
+              </div>
+            )}
+
             <p className="text-muted-foreground text-sm leading-relaxed">{product.description}</p>
 
+            {/* Quantity + MOQ */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Quantity ({product.unit})</label>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="number"
+                  min={product.moq}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-28"
+                />
+                {quantity < product.moq && (
+                  <span className="text-xs text-destructive flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> MOQ: {product.moq}
+                  </span>
+                )}
+              </div>
+            </div>
+
             <div className="flex gap-3 pt-2">
-              <Button className="gap-2" onClick={handleAddToInquiry}>
-                <ShoppingCart className="h-4 w-4" /> Add to Inquiry
+              <Button className="gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
+                <ShoppingCart className="h-4 w-4" /> Add to Cart
               </Button>
               <Button variant="outline" className="gap-2">
                 <MessageSquare className="h-4 w-4" /> Contact Supplier
@@ -85,24 +166,29 @@ const ProductDetail = () => {
           {/* Bulk Pricing */}
           <div>
             <h2 className="text-lg font-bold mb-3">Bulk Pricing</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Price per {product.unit}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {product.bulkPricing.map((tier, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      {tier.maxQty ? `${tier.minQty} – ${tier.maxQty}` : `${tier.minQty}+`}
-                    </TableCell>
-                    <TableCell className="font-semibold">₹{tier.price}</TableCell>
+            {showPrice ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Quantity</TableHead>
+                    <TableHead>Price per {product.unit}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {product.bulkPricing.map((tier, i) => (
+                    <TableRow key={i} className={quantity >= tier.minQty && (tier.maxQty === null || quantity <= tier.maxQty) ? "bg-primary/5" : ""}>
+                      <TableCell>{tier.maxQty ? `${tier.minQty} – ${tier.maxQty}` : `${tier.minQty}+`}</TableCell>
+                      <TableCell className="font-semibold">₹{tier.price}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                <Lock className="h-5 w-5 mx-auto mb-2" />
+                {!buyer.isLoggedIn ? "Login to view pricing" : "Complete KYC to view pricing"}
+              </div>
+            )}
           </div>
         </div>
 
