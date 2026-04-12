@@ -18,6 +18,8 @@ import Checkout from "./pages/Checkout.tsx";
 import Orders from "./pages/Orders.tsx";
 import OrderDetail from "./pages/OrderDetail.tsx";
 import TicketView from "./pages/TicketView.tsx";
+import Login from "./pages/Login.tsx";
+import KYC from "./pages/KYC.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/kyc" element={<KYC />} />
                   <Route path="/search" element={<SearchResults />} />
                   <Route path="/category/:categoryId" element={<ProductListing />} />
                   <Route path="/product/:productId" element={<ProductDetail />} />
