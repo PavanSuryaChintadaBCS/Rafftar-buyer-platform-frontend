@@ -42,13 +42,13 @@ const CartProvider = ({ children }) => {
     );
   }, []);
   const clearCart = useCallback(() => setItems([]), []);
-  const getGroupedBySuppier = useCallback(() => {
+  const getGroupedBySupplier = useCallback(() => {
     return items.reduce((acc, item) => {
       (acc[item.supplierId] ||= []).push(item);
       return acc;
     }, {});
   }, [items]);
-  return <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, itemCount: items.length, getGroupedBySuppier }}>{children}</CartContext.Provider>;
+  return <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, itemCount: items.length, getGroupedBySupplier }}>{children}</CartContext.Provider>;
 };
 const useCart = () => {
   const ctx = useContext(CartContext);
