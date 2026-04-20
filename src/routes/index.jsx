@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { PublicLayout } from "@/container/PublicLayout";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { publicLayoutRoutes, standaloneRoutes, pages } from "./config";
 
