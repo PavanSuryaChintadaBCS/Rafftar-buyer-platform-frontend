@@ -6,7 +6,8 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
+    /* Warm canvas so primary orange reads clearly (not against cold gray-blues). */
+    --background: 32 28% 98%;
     --foreground: 220 20% 10%;
 
     --card: 0 0% 100%;
@@ -15,35 +16,39 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 10%;
 
-    --primary: 24 85% 55%;
+    /* Brand orange: RGB(235, 76, 36) / #EB4C24 — hue nudged toward true orange (less “red”). */
+    --primary: 16 88% 52%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 94%;
+    --secondary: 28 18% 94%;
     --secondary-foreground: 220 20% 20%;
 
-    --muted: 220 15% 95%;
+    --muted: 28 16% 95%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 24 85% 95%;
-    --accent-foreground: 24 85% 30%;
+    --accent: 16 70% 96%;
+    --accent-foreground: 16 78% 28%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 24 85% 55%;
+    --border: 28 14% 90%;
+    --input: 28 14% 90%;
+    --ring: 16 88% 52%;
+
+    /* ".ai" suffix red in logo mark */
+    --raftaar-ai: 355 78% 48%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 32 22% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 24 85% 55%;
+    --sidebar-primary: 16 88% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 24 85% 95%;
-    --sidebar-accent-foreground: 24 85% 30%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 24 85% 55%;
+    --sidebar-accent: 16 70% 96%;
+    --sidebar-accent-foreground: 16 78% 28%;
+    --sidebar-border: 28 14% 91%;
+    --sidebar-ring: 16 88% 52%;
   }
 
   .dark {
@@ -56,7 +61,7 @@
     --popover: 220 20% 10%;
     --popover-foreground: 40 20% 95%;
 
-    --primary: 24 85% 55%;
+    --primary: 16 90% 56%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 15% 18%;
@@ -65,24 +70,26 @@
     --muted: 220 15% 15%;
     --muted-foreground: 220 10% 55%;
 
-    --accent: 24 50% 15%;
-    --accent-foreground: 24 85% 75%;
+    --accent: 16 45% 18%;
+    --accent-foreground: 16 85% 72%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 15% 18%;
     --input: 220 15% 18%;
-    --ring: 24 85% 55%;
+    --ring: 16 90% 56%;
+
+    --raftaar-ai: 355 82% 62%;
 
     --sidebar-background: 220 20% 7%;
     --sidebar-foreground: 40 20% 95%;
-    --sidebar-primary: 24 85% 55%;
+    --sidebar-primary: 16 90% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 24 50% 15%;
-    --sidebar-accent-foreground: 24 85% 75%;
+    --sidebar-accent: 16 45% 18%;
+    --sidebar-accent-foreground: 16 85% 72%;
     --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 24 85% 55%;
+    --sidebar-ring: 16 90% 56%;
   }
 }
 
@@ -98,5 +105,19 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-background;
+  }
+
+  .page-container {
+    @apply container mx-auto w-full max-w-[1400px] px-4 sm:px-5 md:px-6;
+  }
+
+  .section-y {
+    @apply py-6 sm:py-8 md:py-10;
   }
 }
