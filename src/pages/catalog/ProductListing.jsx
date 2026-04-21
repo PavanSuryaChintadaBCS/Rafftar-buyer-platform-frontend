@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/product/ProductCard";
 import FilterSidebar from "@/components/product/FilterSidebar";
 import { getProductsByCategory } from "@/data/mock";
-import { mockApi } from "@/utils/mock-api";
+import { mockApi } from "@/utils/http-service";
 import { useState, useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";

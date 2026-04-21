@@ -1,7 +1,7 @@
 import {
   createContext, useContext, useState, useCallback, useMemo, useEffect
 } from "react";
-import { readStorageItem, writeStorageItem } from "@/utils/storage-keys";
+import { readStorageItem, writeStorageItem } from "@/utils/offline-services";
 import { safeParse } from "@/utils/persist";
 import { getProductById, getPriceForQuantity } from "@/data/mock";
 

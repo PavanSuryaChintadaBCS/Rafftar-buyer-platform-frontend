@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import { readStorageItem, writeStorageItem } from "@/utils/storage-keys";
+import { readStorageItem, writeStorageItem } from "@/utils/offline-services";
 const defaultBuyer = {
   isLoggedIn: false,
   isKYCVerified: false,

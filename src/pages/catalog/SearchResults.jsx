@@ -2,7 +2,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/product/ProductCard";
 import SupplierCard from "@/components/supplier/SupplierCard";
-import { mockApi } from "@/utils/mock-api";
+import { mockApi } from "@/utils/http-service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Building2, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import HeroSearch from "@/components/HeroSearch";
 import CategoryGrid from "@/components/CategoryGrid";
-import { mockApi } from "@/utils/mock-api";
+import { mockApi } from "@/utils/http-service";
 import { Flame, Sparkles, Star, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getProductImage } from "@/data/images";
