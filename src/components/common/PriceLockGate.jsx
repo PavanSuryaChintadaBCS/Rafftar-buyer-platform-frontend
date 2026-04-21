@@ -1,25 +1,30 @@
 import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useBuyer } from "@/contexts/BuyerContext";
+import { memo } from "react";
 
-export function PriceLockGate({ children, productId, className = "" }) {
-  const { buyer } = useBuyer();
+export const PriceLockGate = memo(function PriceLockGate({
+  children,
+  productId,
+  isUnlocked,
+  isLoggedIn,
+  className = "",
+}) {
   const navigate = useNavigate();
-
-  const isUnlocked = buyer.isLoggedIn && buyer.isKYCVerified;
 
   if (isUnlocked) return children;
 
   const handleClick = (e) => {
     e.preventDefault();
-    if (!buyer.isLoggedIn) {
-      navigate("/login", { state: { from: productId ? `/product/${productId}` : "/" } });
+    if (!isLoggedIn) {
+      navigate("/login", {
+        state: { from: productId ? `/product/${productId}` : "/" },
+      });
     } else {
       navigate("/kyc");
     }
   };
 
-  const label = !buyer.isLoggedIn
+  const label = !isLoggedIn
     ? "Login to see price"
     : "Complete KYC for price";
 
@@ -32,4 +37,4 @@ export function PriceLockGate({ children, productId, className = "" }) {
       {label}
     </button>
   );
-}
+});

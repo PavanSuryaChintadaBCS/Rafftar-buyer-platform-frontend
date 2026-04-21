@@ -4,14 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { getProductImage } from "@/data/images";
-import { useBuyer } from "@/contexts/BuyerContext";
 import { PriceLockGate } from "@/components/common/PriceLockGate";
 
-const ProductCard = memo(function ProductCard({ product }) {
-  const { buyer } = useBuyer();
-
+const ProductCard = memo(function ProductCard({
+  product,
+  buyerType,
+  isUnlocked,
+  isLoggedIn,
+}) {
   const discountedPrice =
-    buyer.type === "rafftar" && product.rafftarDiscount > 0
+    buyerType === "rafftar" && product.rafftarDiscount > 0
       ? Math.round(product.price * (1 - product.rafftarDiscount / 100))
       : null;
 
@@ -38,10 +40,16 @@ const ProductCard = memo(function ProductCard({ product }) {
         <div className="flex items-center gap-1">
           <Star className="h-3.5 w-3.5 fill-primary text-primary" />
           <span className="text-xs font-medium">{product.rating}</span>
-          <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+          <span className="text-xs text-muted-foreground">
+            ({product.reviewCount})
+          </span>
         </div>
 
-        <PriceLockGate productId={product.id}>
+        <PriceLockGate
+          productId={product.id}
+          isUnlocked={isUnlocked}
+          isLoggedIn={isLoggedIn}
+        >
           <div className="flex items-baseline gap-1">
             {discountedPrice ? (
               <>
@@ -60,11 +68,15 @@ const ProductCard = memo(function ProductCard({ product }) {
                 ₹{product.price}
               </span>
             )}
-            <span className="text-xs text-muted-foreground">/{product.unit}</span>
+            <span className="text-xs text-muted-foreground">
+              /{product.unit}
+            </span>
           </div>
         </PriceLockGate>
 
-        <p className="text-xs text-muted-foreground truncate">{product.supplierName}</p>
+        <p className="text-xs text-muted-foreground truncate">
+          {product.supplierName}
+        </p>
 
         <Link to={`/product/${product.id}`}>
           <Button

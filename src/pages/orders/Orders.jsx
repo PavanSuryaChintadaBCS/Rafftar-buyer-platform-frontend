@@ -92,7 +92,7 @@ const Orders = () => {
                             </span>
                             <span className="text-muted-foreground/40">•</span>
                             <span className="font-semibold text-foreground">
-                              ₹{order.total.toLocaleString()}
+                              ₹{(order.total ?? 0).toLocaleString()}
                             </span>
                             <span className="text-muted-foreground/40">•</span>
                             <span>{format(new Date(order.createdAt), "dd MMM yyyy")}</span>

@@ -1,4 +1,4 @@
-// src/pages/home/Index.jsx
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import HeroSearch from "@/components/HeroSearch";
 import CategoryGrid from "@/components/CategoryGrid";
@@ -10,12 +10,64 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProductGrid } from "@/components/common/ProductGrid";
 import { SupplierGrid } from "@/components/common/SupplierGrid";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { useBuyer } from "@/contexts/BuyerContext";
 
 const Index = () => {
+  const { buyer } = useBuyer();
+
   const { data, isPending, isError } = useQuery({
     queryKey: ["catalog"],
     queryFn: () => mockApi.getCatalog(),
   });
+
+  const products = useMemo(() => data?.products || [], [data]);
+  const suppliers = useMemo(() => data?.suppliers || [], [data]);
+  const categories = useMemo(() => data?.categories || [], [data]);
+
+  const trendingProducts = useMemo(
+    () => products.filter((p) => p.rating >= 4.5).slice(0, 4),
+    [products]
+  );
+
+  const newArrivals = useMemo(
+    () =>
+      products
+        .filter((p) =>
+          ["paint", "wood", "hardware", "waterproofing"].includes(p.category)
+        )
+        .slice(0, 4),
+    [products]
+  );
+
+  const bestDeals = useMemo(
+    () => products.filter((p) => p.rafftarDiscount >= 5).slice(0, 4),
+    [products]
+  );
+
+  const topRated = useMemo(
+    () => [...products].sort((a, b) => b.rating - a.rating).slice(0, 8),
+    [products]
+  );
+
+  const popularSuppliers = useMemo(
+    () => suppliers.filter((s) => s.rating >= 4.4).slice(0, 4),
+    [suppliers]
+  );
+
+  const categoryHighlights = useMemo(() => {
+    return categories.slice(0, 6).map((cat) => {
+      const catProducts = products.filter((p) => p.category === cat.id);
+      return {
+        category: cat,
+        product: catProducts[0],
+        count: catProducts.length,
+      };
+    });
+  }, [categories, products]);
+
+  const buyerType = buyer.type;
+  const isLoggedIn = buyer.isLoggedIn;
+  const isUnlocked = buyer.isLoggedIn && buyer.isKYCVerified;
 
   if (isPending) {
     return (
@@ -45,36 +97,28 @@ const Index = () => {
     );
   }
 
-  const { products, suppliers, categories } = data;
-  const trendingProducts = products.filter((p) => p.rating >= 4.5).slice(0, 4);
-  const newArrivals = products
-    .filter((p) => ["paint", "wood", "hardware", "waterproofing"].includes(p.category))
-    .slice(0, 4);
-  const bestDeals = products.filter((p) => p.rafftarDiscount >= 5).slice(0, 4);
-  const topRated = [...products].sort((a, b) => b.rating - a.rating).slice(0, 8);
-  const popularSuppliers = suppliers.filter((s) => s.rating >= 4.4).slice(0, 4);
-  const categoryHighlights = categories.slice(0, 6).map((cat) => {
-    const catProducts = products.filter((p) => p.category === cat.id);
-    return { category: cat, product: catProducts[0], count: catProducts.length };
-  });
-
   return (
     <div className="page-shell">
       <main className="page-container py-6 sm:py-8">
         <HeroSearch />
         <CategoryGrid />
 
-        {/* Trending Now */}
+        {/* Trending */}
         <section className="py-8">
           <SectionHeader
             icon={<Flame className="h-5 w-5 text-primary" />}
             title="Trending Now"
             viewAllTo="/search?q=trending"
           />
-          <ProductGrid products={trendingProducts} />
+          <ProductGrid
+            products={trendingProducts}
+            buyerType={buyerType}
+            isUnlocked={isUnlocked}
+            isLoggedIn={isLoggedIn}
+          />
         </section>
 
-        {/* Category Showcase Banner */}
+        {/* Category Showcase */}
         <section className="py-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {categoryHighlights.map((item, i) => (
@@ -92,8 +136,12 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-primary-foreground text-sm font-bold">{item.category.name}</p>
-                  <p className="text-primary-foreground/70 text-xs">{item.count} products</p>
+                  <p className="text-primary-foreground text-sm font-bold">
+                    {item.category.name}
+                  </p>
+                  <p className="text-primary-foreground/70 text-xs">
+                    {item.count} products
+                  </p>
                 </div>
               </Link>
             ))}
@@ -107,10 +155,15 @@ const Index = () => {
             title="New Arrivals"
             viewAllTo="/search?q=paint"
           />
-          <ProductGrid products={newArrivals} />
+          <ProductGrid
+            products={newArrivals}
+            buyerType={buyerType}
+            isUnlocked={isUnlocked}
+            isLoggedIn={isLoggedIn}
+          />
         </section>
 
-        {/* Best Bulk Deals — keep custom styled wrapper, no SectionHeader */}
+        {/* Best Bulk Deals */}
         <section className="py-6">
           <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/30 border border-primary/20 p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
@@ -120,18 +173,29 @@ const Index = () => {
                 Up to 6% off
               </span>
             </div>
-            <ProductGrid products={bestDeals} />
+            <ProductGrid
+              products={bestDeals}
+              buyerType={buyerType}
+              isUnlocked={isUnlocked}
+              isLoggedIn={isLoggedIn}
+            />
           </div>
         </section>
 
-        {/* Top Rated Products */}
+        {/* Top Rated */}
         <section className="py-8">
           <SectionHeader
             icon={<Star className="h-5 w-5 fill-primary text-primary" />}
             title="Top Rated Products"
             viewAllTo="/category/cement"
           />
-          <ProductGrid products={topRated} animationBase={80} />
+          <ProductGrid
+            products={topRated}
+            animationBase={80}
+            buyerType={buyerType}
+            isUnlocked={isUnlocked}
+            isLoggedIn={isLoggedIn}
+          />
         </section>
 
         {/* Popular Suppliers */}
