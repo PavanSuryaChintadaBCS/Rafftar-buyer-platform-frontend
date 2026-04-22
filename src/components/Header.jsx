@@ -2,7 +2,7 @@ import { Search, ShoppingCart, User, Package, LogOut, LogIn, ChevronDown } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
-import { useBuyer } from "@/contexts/BuyerContext";
+import { useBuyer } from "@/hooks/useBuyer";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";

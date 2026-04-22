@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { getProductImage } from "@/data/images";
 import { Star, MapPin, ShoppingCart, AlertTriangle, Lock, Zap, Eye, Calendar, CreditCard } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { useBuyer } from "@/contexts/BuyerContext";
+import { useBuyer } from "@/hooks/useBuyer";
 import { toast } from "sonner";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";

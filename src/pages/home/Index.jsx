@@ -13,7 +13,7 @@ import { ProductGrid } from "@/components/common/ProductGrid";
 import { SupplierGrid } from "@/components/common/SupplierGrid";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { CategoryShowcase } from "@/components/common/CategoryShowcase";
-import { useBuyer } from "@/contexts/BuyerContext";
+import { useBuyer } from "@/hooks/useBuyer";
 
 const Index = () => {
   const { buyer } = useBuyer();

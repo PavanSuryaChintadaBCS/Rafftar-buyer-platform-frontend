@@ -1,7 +1,7 @@
 // src/hooks/useAuthGuard.js
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useBuyer } from "@/contexts/BuyerContext";
+import { useBuyer } from "@/hooks/useBuyer";
 
 export function useAuthGuard({ from = "/cart" } = {}) {
   const { buyer } = useBuyer();

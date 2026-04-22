@@ -1,5 +1,5 @@
-
-import { createContext, useContext, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { BuyerContext } from "./buyerContextInstance";
 import { readStorageItem, writeStorageItem } from "@/utils";
 
 const defaultBuyer = {
@@ -7,6 +7,8 @@ const defaultBuyer = {
   isKYCVerified: false,
   type: "standard",
   name: "",
+  email: "",
+  id: null,
 };
 
 function parseSavedBuyer() {
@@ -20,9 +22,7 @@ function parseSavedBuyer() {
   }
 }
 
-const BuyerContext = createContext(undefined);
-
-const BuyerProvider = ({ children }) => {
+export const BuyerProvider = ({ children }) => {
   const [buyer, setBuyer] = useState(parseSavedBuyer);
 
   const update = useCallback((updater) => {
@@ -33,25 +33,28 @@ const BuyerProvider = ({ children }) => {
     });
   }, []);
 
-  const login = useCallback(
-    (name) => {
-      const loginName = name || "User";
-      const isRajesh = loginName.toLowerCase().includes("rajesh");
-      update((prev) => ({
-        ...prev,
-        isLoggedIn: true,
-        name: loginName,
-        type: isRajesh ? "rafftar" : "standard",
-        isKYCVerified: isRajesh ? true : prev.isKYCVerified,
-      }));
-    },
-    [update]
-  );
+  // Accepts a buyer object from the real API: { id, email, buyer_type, is_kyc_verified }
+  const login = useCallback((buyerData) => {
+    update(() => ({
+      isLoggedIn: true,
+      id:            buyerData.id            ?? null,
+      email:         buyerData.email         ?? "",
+      name:          buyerData.name          ?? buyerData.email?.split("@")[0] ?? "User",
+      type:          buyerData.buyer_type    ?? "standard",
+      isKYCVerified: buyerData.is_kyc_verified ?? false,
+    }));
+  }, [update]);
 
-  const logout = useCallback(
-    () => update(() => ({ ...defaultBuyer })),
-    [update]
-  );
+  const logout = useCallback(async () => {
+    try {
+      // Dynamically import to avoid circular dep at module load time
+      const { httpService } = await import("@/utils/http-service");
+      await httpService.logout();
+    } catch {
+      localStorage.removeItem("auth_token");
+    }
+    update(() => ({ ...defaultBuyer }));
+  }, [update]);
 
   const toggleKYC = useCallback(
     () => update((prev) => ({ ...prev, isKYCVerified: !prev.isKYCVerified })),
@@ -69,11 +72,3 @@ const BuyerProvider = ({ children }) => {
     </BuyerContext.Provider>
   );
 };
-
-const useBuyer = () => {
-  const ctx = useContext(BuyerContext);
-  if (!ctx) throw new Error("useBuyer must be used within BuyerProvider");
-  return ctx;
-};
-
-export { BuyerProvider, useBuyer };
