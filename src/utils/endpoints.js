@@ -4,7 +4,7 @@
  * HOW TO SWITCH FROM MOCK TO REAL BACKEND
  * ────────────────────────────────────────
  * 1. Set BASE_URL to your actual API base, e.g.:
- *      export const BASE_URL = "https://api.bharatbuildcon.com/v1";
+ *      export const BASE_URL = "https://api.rafftar.com";
  * 2. Set IS_MOCK = false.
  * 3. In http-service.js, the real fetch branch will activate automatically.
  * 4. No other file needs to change.
@@ -24,54 +24,64 @@ export const API_ROOT = `${BASE_URL}${API_VERSION}`;
 
 // ─── Endpoint paths ───────────────────────────────────────────────────────────
 // All paths are relative to API_ROOT.
-// Usage: `${API_ROOT}${ENDPOINTS.catalog}`
+// Usage: `${API_ROOT}${ENDPOINTS.login}`
 
 export const ENDPOINTS = {
-  // Catalog
-  catalog:                "/catalog",
+  // Auth
+  register:               "/auth/register",
+  login:                  "/auth/login",
+  refresh:                "/auth/refresh",
+  logout:                 "/auth/logout",
+  authMe:                 "/auth/me",
+
+  // Buyers
+  buyersMe:               "/buyers/me",
+
+  // KYC
+  kycSubmit:              "/kyc/submit",
+  kycStatus:              "/kyc/status",
+  kycResubmit:            "/kyc/resubmit",
+
+  // Addresses
+  addresses:              "/addresses",
+  addressById:            (id)            => `/addresses/${id}`,
+
+  // Cart
+  cart:                   "/cart",
+  cartItems:              "/cart/items",
+  cartItemByProduct:      (productId)     => `/cart/items/${productId}`,
+
+  // Orders
+  orders:                 "/orders",
+  ordersCheckout:         "/orders/checkout",
+  orderById:              (id)            => `/orders/${id}`,
+  orderCancel:            (id)            => `/orders/${id}/cancel`,
+
+  // Categories
   categories:             "/categories",
 
   // Products
   products:               "/products",
-  productById:            (id)         => `/products/${id}`,
-  productsByCategory:     (categoryId) => `/products?category=${categoryId}`,
-  productsBySupplier:     (supplierId) => `/products?supplier=${supplierId}`,
-  searchProducts:         (q)          => `/products/search?q=${encodeURIComponent(q)}`,
+  productsSearch:         "/products/search",
+  productById:            (productId)     => `/products/${productId}`,
 
   // Suppliers
   suppliers:              "/suppliers",
-  supplierById:           (id)         => `/suppliers/${id}`,
-  searchSuppliers:        (q)          => `/suppliers/search?q=${encodeURIComponent(q)}`,
+  supplierById:           (supplierPgId)  => `/suppliers/${supplierPgId}`,
+  supplierProducts:       (supplierPgId)  => `/suppliers/${supplierPgId}/products`,
 
-  // Search (combined)
-  search:                 (q)          => `/search?q=${encodeURIComponent(q)}`,
-
-  // Auth
-  login:                  "/auth/login",
-  loginOtp:               "/auth/otp/send",
-  verifyOtp:              "/auth/otp/verify",
-  signup:                 "/auth/signup",
-  logout:                 "/auth/logout",
-
-  // Buyer / KYC
-  buyerProfile:           "/buyer/profile",
-  kycSubmit:              "/buyer/kyc",
-  kycStatus:              "/buyer/kyc/status",
-
-  // Cart / Checkout
-  cart:                   "/cart",
-  checkout:               "/checkout",
-
-  // Orders
-  orders:                 "/orders",
-  orderById:              (id)         => `/orders/${id}`,
-  orderProgress:          (id)         => `/orders/${id}/progress`,
-
-  // Support tickets
+  // Tickets
   tickets:                "/tickets",
-  ticketById:             (id)         => `/tickets/${id}`,
-  ticketMessages:         (id)         => `/tickets/${id}/messages`,
+  ticketsByUser:          (userId)        => `/tickets/user/${userId}`,
+  ticketById:             (id)            => `/tickets/${id}`,
+  ticketStatus:           (id)            => `/tickets/${id}/status`,
+  ticketAssign:           (id)            => `/tickets/${id}/assign`,
+  ticketResolve:          (id)            => `/tickets/${id}/resolve`,
+  ticketMessages:         (id)            => `/tickets/${id}/messages`,
 
-  // Addresses
-  addresses:              "/addresses",
+  // Inquiries
+  inquiries:              "/inquiries",
+
+  // Search (combined — supports ?q=&type=all|products|suppliers)
+  search:                 "/search",
 };
