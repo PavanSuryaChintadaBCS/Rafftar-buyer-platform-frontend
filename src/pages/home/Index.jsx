@@ -7,12 +7,11 @@ import HeroSearch from "@/components/HeroSearch";
 import CategoryGrid from "@/components/CategoryGrid";
 import { mockApi } from "@/utils/mock-api";
 import { Flame, Sparkles, Star, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
-import { getProductImage } from "@/data/images";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductGrid } from "@/components/common/ProductGrid";
 import { SupplierGrid } from "@/components/common/SupplierGrid";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { CategoryShowcase } from "@/components/common/CategoryShowcase";
 import { useBuyer } from "@/contexts/BuyerContext";
 
 const Index = () => {
@@ -60,17 +59,18 @@ const categories = useMemo(() => data?.categories || [], [data]);
     [suppliers]
   );
 
+  
+
   const categoryHighlights = useMemo(() => {
-    return categories.slice(0, 6).map((cat) => {
-      const catProducts = products.filter((p) => p.category === cat.id);
-      return {
-        category: cat,
-        product: catProducts[0],
-        count: catProducts.length,
-      };
-    });
+    return categories.slice(0, 6).map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      count: products.filter((p) => p.category === cat.id).length,
+    }));
   }, [categories, products]);
 
+
+  
   // Buyer state
   const buyerType = buyer.type;
   const isLoggedIn = buyer.isLoggedIn;
@@ -119,34 +119,7 @@ const categories = useMemo(() => data?.categories || [], [data]);
         </section>
 
         {/* Category Showcase */}
-        <section className="py-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {categoryHighlights.map((item, i) => (
-              <Link
-                key={item.category.id}
-                to={`/category/${item.category.id}`}
-                className="group relative rounded-xl overflow-hidden h-40 animate-fade-in"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <img
-                  src={getProductImage(item.category.id)}
-                  alt={item.category.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-primary-foreground text-sm font-bold">
-                    {item.category.name}
-                  </p>
-                  <p className="text-primary-foreground/70 text-xs">
-                    {item.count} products
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CategoryShowcase categoryHighlights={categoryHighlights} />
 
         {/*  New Arrivals */}
         <section className="py-8">
@@ -209,3 +182,4 @@ const categories = useMemo(() => data?.categories || [], [data]);
 };
 
 export default Index;
+
