@@ -1,15 +1,17 @@
+// // src/pages/home/Index.jsx
+//111
+
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import HeroSearch from "@/components/HeroSearch";
 import CategoryGrid from "@/components/CategoryGrid";
-import { mockApi } from "@/utils/http-service";
+import { mockApi } from "@/utils/mock-api";
 import { Flame, Sparkles, Star, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
-import { getProductImage } from "@/data/images";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductGrid } from "@/components/common/ProductGrid";
 import { SupplierGrid } from "@/components/common/SupplierGrid";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { CategoryShowcase } from "@/components/common/CategoryShowcase";
 import { useBuyer } from "@/contexts/BuyerContext";
 
 const Index = () => {
@@ -20,10 +22,13 @@ const Index = () => {
     queryFn: () => mockApi.getCatalog(),
   });
 
-  const products = useMemo(() => data?.products || [], [data]);
-  const suppliers = useMemo(() => data?.suppliers || [], [data]);
-  const categories = useMemo(() => data?.categories || [], [data]);
+  
 
+  const products = useMemo(() => data?.products || [], [data]);
+const suppliers = useMemo(() => data?.suppliers || [], [data]);
+const categories = useMemo(() => data?.categories || [], [data]);
+
+  //Derived data (memoized)
   const trendingProducts = useMemo(
     () => products.filter((p) => p.rating >= 4.5).slice(0, 4),
     [products]
@@ -54,21 +59,24 @@ const Index = () => {
     [suppliers]
   );
 
+  
+
   const categoryHighlights = useMemo(() => {
-    return categories.slice(0, 6).map((cat) => {
-      const catProducts = products.filter((p) => p.category === cat.id);
-      return {
-        category: cat,
-        product: catProducts[0],
-        count: catProducts.length,
-      };
-    });
+    return categories.slice(0, 6).map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      count: products.filter((p) => p.category === cat.id).length,
+    }));
   }, [categories, products]);
 
+
+  
+  // Buyer state
   const buyerType = buyer.type;
   const isLoggedIn = buyer.isLoggedIn;
   const isUnlocked = buyer.isLoggedIn && buyer.isKYCVerified;
 
+  // Loading
   if (isPending) {
     return (
       <div className="page-shell">
@@ -86,15 +94,7 @@ const Index = () => {
   }
 
   if (isError || !data) {
-    return (
-      <div className="page-shell">
-        <main className="page-container section-y">
-          <p className="text-center text-sm text-muted-foreground">
-            Unable to load catalog. Please refresh.
-          </p>
-        </main>
-      </div>
-    );
+    return <p className="text-center">Failed to load</p>;
   }
 
   return (
@@ -119,36 +119,9 @@ const Index = () => {
         </section>
 
         {/* Category Showcase */}
-        <section className="py-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {categoryHighlights.map((item, i) => (
-              <Link
-                key={item.category.id}
-                to={`/category/${item.category.id}`}
-                className="group relative rounded-xl overflow-hidden h-40 animate-fade-in"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <img
-                  src={getProductImage(item.category.id)}
-                  alt={item.category.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-primary-foreground text-sm font-bold">
-                    {item.category.name}
-                  </p>
-                  <p className="text-primary-foreground/70 text-xs">
-                    {item.count} products
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CategoryShowcase categoryHighlights={categoryHighlights} />
 
-        {/* New Arrivals */}
+        {/*  New Arrivals */}
         <section className="py-8">
           <SectionHeader
             icon={<Sparkles className="h-5 w-5 text-primary" />}
@@ -163,7 +136,7 @@ const Index = () => {
           />
         </section>
 
-        {/* Best Bulk Deals */}
+        {/*  Best Deals  */}
         <section className="py-6">
           <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/30 border border-primary/20 p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
@@ -182,7 +155,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Top Rated */}
+        {/*  Top Rated */}
         <section className="py-8">
           <SectionHeader
             icon={<Star className="h-5 w-5 fill-primary text-primary" />}
@@ -198,7 +171,7 @@ const Index = () => {
           />
         </section>
 
-        {/* Popular Suppliers */}
+        {/* Suppliers */}
         <section className="py-8 pb-16">
           <SectionHeader title="Popular Suppliers" />
           <SupplierGrid suppliers={popularSuppliers} />
@@ -209,3 +182,4 @@ const Index = () => {
 };
 
 export default Index;
+
