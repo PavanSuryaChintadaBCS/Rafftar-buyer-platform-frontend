@@ -80,10 +80,49 @@ export const httpService = {
       request(ENDPOINTS.suppliers),
       request(ENDPOINTS.products),
     ]);
+
+    const rawCategories = cats.data?.categories ?? [];
+    const rawSuppliers  = sups.data?.suppliers  ?? [];
+    const rawProducts   = prods.data             ?? [];
+
     return {
-      categories: cats.data?.categories ?? cats,
-      suppliers:  sups.data?.suppliers  ?? sups,
-      products:   prods.data            ?? prods,
+      categories: rawCategories.map((cat) =>
+        typeof cat === "string"
+          ? { id: cat, name: cat.charAt(0).toUpperCase() + cat.slice(1) }
+          : cat
+      ),
+      suppliers: rawSuppliers.map((s) => ({
+        id:           s.pgId ?? s._id,
+        name:         s.name,
+        logo:         s.logo,
+        description:  s.description,
+        location:     s.location?.displayText ?? (typeof s.location === "string" ? s.location : ""),
+        rating:       s.rating       ?? 0,
+        reviewCount:  s.reviewCount  ?? 0,
+        productCount: s.productCount ?? 0,
+        categories:   s.categories   ?? [],
+        rafftarPricing: s.rafftarPricing ?? false,
+      })),
+      products: rawProducts.map((p) => ({
+        id:              p._id        ?? p.id,
+        name:            p.name,
+        slug:            p.slug,
+        category:        p.category,
+        price:           p.discountedPrice ?? p.basePrice ?? p.price,
+        basePrice:       p.basePrice,
+        rafftarDiscount: p.basePrice && p.discountedPrice
+          ? Math.max(0, Math.round((1 - p.discountedPrice / p.basePrice) * 100))
+          : 0,
+        bulkPricing:    p.bulkPricing  ?? [],
+        unit:           p.unit         ?? "piece",
+        moq:            p.moq          ?? 1,
+        inStock:        p.inStock      ?? true,
+        supplierPgId:   p.supplierPgId,
+        supplierName:   p.supplierName ?? "",
+        rating:         p.rating       ?? 0,
+        reviewCount:    p.reviewCount  ?? 0,
+        specifications: p.specifications ?? {},
+      })),
     };
   },
 

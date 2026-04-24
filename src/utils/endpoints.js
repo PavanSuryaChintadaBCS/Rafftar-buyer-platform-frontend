@@ -11,10 +11,10 @@
  */
 
 /** Set to false when you are ready to hit a real backend. */
-export const IS_MOCK = true;
+export const IS_MOCK = false;
 
 /** Base URL for all API requests. Empty string = same origin (for mock/proxy). */
-export const BASE_URL = "http://localhost:3000";
+export const BASE_URL = "";
 
 /** API version prefix appended to BASE_URL. */
 export const API_VERSION = "/api/v1";

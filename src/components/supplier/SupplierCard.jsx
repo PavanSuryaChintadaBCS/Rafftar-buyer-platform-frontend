@@ -15,7 +15,7 @@ const SupplierCard = memo(function SupplierCard({ supplier }) {
           <h3 className="font-semibold text-base leading-tight">{supplier.name}</h3>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" /> {supplier.location}
+              <MapPin className="h-3 w-3" /> {supplier.location?.displayText ?? supplier.location ?? ""}
             </span>
             <span className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-primary text-primary" /> {supplier.rating} ({supplier.reviewCount})

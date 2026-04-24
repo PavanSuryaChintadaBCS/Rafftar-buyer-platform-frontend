@@ -40,7 +40,7 @@ const CategoryShowcase = React.memo(({ categoryHighlights }) => (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       {categoryHighlights.map((item, i) => (
         <CategoryCard
-          key={item.id}
+          key={item.id ?? `category-${i}`}
           id={item.id}
           name={item.name}
           count={item.count}

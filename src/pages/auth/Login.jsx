@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Building2, Mail, Lock, User, Phone } from "lucide-react";
+import { Mail, Lock, User, Phone } from "lucide-react";
 import { PoweredByRafftar } from "@/components/PoweredByRafftar";
 
 const Login = () => {
@@ -22,7 +22,6 @@ const Login = () => {
   const [signupName,    setSignupName]    = useState("");
   const [signupEmail,   setSignupEmail]   = useState("");
   const [signupPhone,   setSignupPhone]   = useState("");
-  const [signupCompany, setSignupCompany] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -62,13 +61,14 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const data = await httpService.register({
+      await httpService.register({
         email:    signupEmail,
         password: signupPassword,
-        name:     signupName    || undefined,
-        phone:    signupPhone   || undefined,
-        company:  signupCompany || undefined,
+        fullName: signupName  || undefined,
+        phone:    signupPhone || undefined,
       });
+      // Register doesn't issue a token — login immediately to get one
+      const data = await httpService.login({ email: signupEmail, password: signupPassword });
       const buyer = data.buyer ?? data;
       login(buyer);
       toast.success("Account created! Complete KYC to unlock full features.");
@@ -188,19 +188,7 @@ const Login = () => {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-company">Company Name</Label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-company"
-                        value={signupCompany}
-                        onChange={(e) => setSignupCompany(e.target.value)}
-                        className="pl-10"
-                        placeholder="ABC Constructions Pvt Ltd"
-                      />
-                    </div>
-                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password * (min 8 chars)</Label>
                     <div className="relative">
